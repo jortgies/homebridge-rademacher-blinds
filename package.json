@@ -1,17 +1,17 @@
 {
-  "name": "homebridge-rademacher-blinds",
-  "version": "0.0.8",
-  "description": "rademacher blinds plugin for homebridge: https://github.com/jortgies/homebridge-rademacher-blinds",
+  "name": "homebridge-rademacher-homepilot",
+  "version": "0.0.4",
+  "description": "rademacher homepilot plugin for homebridge: https://github.com/bombadiltom/homebridge-rademacher-homepilot",
   "license": "MIT",
   "keywords": [
     "homebridge-plugin"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/jortgies/homebridge-rademacher-blinds.git"
+    "url": "https://github.com/bombadiltom/homebridge-rademacher-homepilot.git"
   },
   "bugs": {
-    "url": "http://github.com/jortgies/homebridge-rademacher-blinds/issues"
+    "url": "http://github.com/bombadiltom/homebridge-rademacher-homepilot/issues"
   },
   "engines": {
     "node": ">=0.12.0",
