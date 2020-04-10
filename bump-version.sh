@@ -66,8 +66,7 @@ if [ -f VERSION ]; then
     read
     echo -e "$PUSHING_MSG"
     git tag -f -a -m "Tag version ${INPUT_STRING}." "v$INPUT_STRING"
-    php artisan version:absorb
-    git add CHANGELOG.md VERSION config/version.yml
+    git add CHANGELOG.md VERSION package.json
     git commit -m "Bump version to ${INPUT_STRING}."
     git tag -f -a -m "Tag version ${INPUT_STRING}." "v$INPUT_STRING"
     git push origin --tags
