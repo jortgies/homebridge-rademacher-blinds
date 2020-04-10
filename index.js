@@ -25,28 +25,30 @@ function RademacherBlinds(log, config, api) {
         this.api = api;
 
         this.api.on('didFinishLaunching', function () {
-            axios.get(this.url, {
-                params: {
-                    devices: 1
-                }
-            })
+            let url = `${this.url}/v4/devices?devtype=Actuator`;
+            axios.get(url)
                 .then((response) => {
-                    let body = JSON.parse(response.data);
-                    body.devices.forEach(function (data) {
-                        if (data.productName.includes("RolloTron") || data.productName.includes("Troll Comfort")) {
-                            let uuid = UUIDGen.generate(data.serial);
+                    let body = response.data;
+                    if (!body.devices) {
+                        return new Error("No devices returned from Homepilot");
+                    }
+
+                    body.devices.forEach((data) => {
+                        if (["27601565", "35000864", "14234511", "35000662", "36500172", "36500572_A", "16234511_A", "16234511_S", "45059071", "31500162", "23602075"].includes(data.deviceNumber)) {
+                            let uuid = UUIDGen.generate(`${data.did}`);
                             let accessory = self.accessories[uuid];
 
                             if (accessory === undefined) {
                                 self.addAccessory(data);
                             } else {
-                                self.log("Online: %s [%s]", accessory.displayName, data.serial);
+                                self.log("Online: %s [%s]", accessory.displayName, data.did);
                                 self.accessories[uuid] = new RademacherBlindsAccessory(self.log, (accessory instanceof RademacherBlindsAccessory ? accessory.accessory : accessory), data, self.url, self.inverted);
                             }
                         }
                     });
                 })
                 .catch((error) => {
+                    self.log('error' + error);
                     return new Error("Request failed: " + error);
                 });
         }.bind(this));
@@ -58,16 +60,16 @@ RademacherBlinds.prototype.configureAccessory = function (accessory) {
 };
 
 RademacherBlinds.prototype.addAccessory = function (blind) {
-    this.log("Found: %s - %s [%s]", blind.name, blind.description, blind.serial);
+    this.log("Found: %s - %s [%s]", blind.name, blind.description, blind.did);
 
-    let name = null;
+    let name;
     if (!blind.description.trim()) {
         name = blind.name;
     } else {
         name = blind.description;
     }
 
-    let accessory = new Accessory(name, UUIDGen.generate(blind.serial));
+    let accessory = new Accessory(name, UUIDGen.generate(`${blind.did}`));
     accessory.addService(Service.WindowCovering, name);
 
     this.accessories[accessory.UUID] = new RademacherBlindsAccessory(this.log, accessory, blind, this.url, this.inverted);
@@ -85,6 +87,8 @@ RademacherBlinds.prototype.removeAccessory = function (accessory) {
     }
 };
 
+// accessory
+
 function RademacherBlindsAccessory(log, accessory, blind, url, inverted) {
     let self = this;
 
@@ -93,10 +97,10 @@ function RademacherBlindsAccessory(log, accessory, blind, url, inverted) {
     accessory.context.manufacturer = "Rademacher";
     info.setCharacteristic(Characteristic.Manufacturer, accessory.context.manufacturer.toString());
 
-    accessory.context.model = blind.productName;
+    accessory.context.model = blind.deviceNumber;
     info.setCharacteristic(Characteristic.Model, accessory.context.model.toString());
 
-    accessory.context.serial = blind.serial;
+    accessory.context.serial = blind.did;
     info.setCharacteristic(Characteristic.SerialNumber, accessory.context.serial.toString());
 
     this.inverted = inverted;
@@ -104,9 +108,11 @@ function RademacherBlindsAccessory(log, accessory, blind, url, inverted) {
     this.blind = blind;
     this.log = log;
     this.url = url;
-    this.lastPosition = this.inverted ? reversePercentage(this.blind.position) : this.blind.position;
-    this.currentPositionState = 2;
-    this.currentTargetPosition = 100;
+
+    let position = this.blind.statusesMap.position ? this.blind.statusesMap.position : 0;
+    this.lastPosition = this.inverted ? reversePercentage(position) : position;
+    this.currentPositionState = Characteristic.PositionState.STOPPED;
+    this.currentTargetPosition = this.lastPosition;
 
     this.service = accessory.getService(Service.WindowCovering);
 
@@ -125,6 +131,10 @@ function RademacherBlindsAccessory(log, accessory, blind, url, inverted) {
         .setValue(this.currentPositionState)
         .on('get', this.getPositionState.bind(this));
 
+    this.service.getCharacteristic(Characteristic.ObstructionDetected)
+        .setValue(this.blind.hasErrors)
+        .on('get', this.getObstructionDetected.bind(this));
+
     accessory.updateReachability(true);
 }
 
@@ -134,25 +144,25 @@ RademacherBlindsAccessory.prototype.setTargetPosition = function (value, callbac
     let self = this;
     this.currentTargetPosition = value;
     let moveUp = (this.currentTargetPosition >= this.lastPosition);
-    this.service.setCharacteristic(Characteristic.PositionState, (moveUp ? 1 : 0));
+    this.service.setCharacteristic(Characteristic.PositionState,
+        (moveUp ? Characteristic.PositionState.INCREASING : Characteristic.PositionState.DECREASING)
+    );
     let target = self.inverted ? reversePercentage(value) : value;
 
-    axios.post(this.url, {
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        params: {
-            cid: 9,
-            did: this.blind.did,
-            command: 1,
-            goto: target
-        }
+    let data = {
+        name: 'GOTO_POS_CMD',
+        value: target
+    };
+
+    let url = `${this.url}/devices/${this.blind.did}`;
+    axios.put(url, data, {
+        headers: {'Content-Type': 'application/json'}
     })
-        .then((request) => {
-            if (request.status === 200) {
-                self.service.setCharacteristic(Characteristic.CurrentPosition, self.currentTargetPosition);
-                self.service.setCharacteristic(Characteristic.PositionState, 2);
-                self.lastPosition = self.currentTargetPosition;
-                callback(null, self.currentTargetPosition);
-            }
+        .then(() => {
+            self.service.setCharacteristic(Characteristic.CurrentPosition, self.currentTargetPosition);
+            self.service.setCharacteristic(Characteristic.PositionState, Characteristic.PositionState.STOPPED);
+            self.lastPosition = self.currentTargetPosition;
+            callback(null, self.currentTargetPosition);
         })
         .catch((error) => {
             return callback(new Error("Request failed: " + error), false);
@@ -163,22 +173,20 @@ RademacherBlindsAccessory.prototype.getTargetPosition = function (callback) {
     this.log("%s - Getting target position", this.accessory.displayName);
 
     let self = this;
-    let serial = this.blind.serial;
 
-    axios.get(this.url, {
-        params: {
-            devices: 1
-        }
-    })
+    let url = `${this.url}/v4/devices/${this.blind.did}`;
+    axios.get(url)
         .then((request) => {
-            let body = JSON.parse(request.data);
-            body.devices.forEach(function (data) {
-                if (data.serial === serial) {
-                    let pos = self.inverted ? reversePercentage(data.position) : data.position;
-                    self.currentTargetPosition = pos;
-                    callback(null, pos);
-                }
-            });
+            let body = request.data;
+            let position = body.device.statusesMap ? body.device.statusesMap.Position : null;
+
+            if (position === null) {
+                return callback(new Error("Failed parsing position in device output"), false);
+            }
+
+            let positionNormalized = self.inverted ? reversePercentage(position) : position;
+            self.currentTargetPosition = positionNormalized;
+            callback(null, positionNormalized);
         })
         .catch((error) => {
             return callback(new Error("Request failed: " + error), false);
@@ -189,21 +197,21 @@ RademacherBlindsAccessory.prototype.getCurrentPosition = function (callback) {
     this.log("%s - Getting current position", this.accessory.displayName);
 
     let self = this;
-    let serial = this.blind.serial;
 
-    axios.get(this.url, {
-        params: {
-            devices: 1
-        }
-    })
+    let url = `${this.url}/v4/devices/${this.blind.did}`;
+    axios.get(url)
         .then((request) => {
-            let body = JSON.parse(request.data);
-            body.devices.forEach(function (data) {
-                if (data.serial === serial) {
-                    let pos = self.inverted ? reversePercentage(data.position) : data.position;
-                    callback(null, pos);
-                }
-            });
+            let body = request.data;
+            let position = body.device.statusesMap ? body.device.statusesMap.Position : null;
+
+            if (position === null) {
+                return callback(new Error("Failed parsing position in device output"), false);
+            }
+
+            let positionNormalized = self.inverted ? reversePercentage(position) : position;
+            self.currentTargetPosition = positionNormalized;
+            self.lastPosition = positionNormalized;
+            callback(null, positionNormalized);
         })
         .catch((error) => {
             return callback(new Error("Request failed: " + error), false);
@@ -212,6 +220,23 @@ RademacherBlindsAccessory.prototype.getCurrentPosition = function (callback) {
 
 RademacherBlindsAccessory.prototype.getPositionState = function (callback) {
     callback(null, this.currentPositionState);
+};
+
+RademacherBlindsAccessory.prototype.getObstructionDetected = function (callback) {
+    this.log("%s - Checking for ObstructionDetected", this.accessory.displayName);
+
+    let url = `${this.url}/v4/devices/${this.blind.did}`;
+    axios.get(url)
+        .then((request) => {
+            let body = request.data;
+
+            let hasErrors = body.device.hasErrors !== 0;
+
+            callback(null, hasErrors);
+        })
+        .catch((error) => {
+            return callback(new Error("Request failed: " + error), false);
+        });
 };
 
 function reversePercentage(p) {
