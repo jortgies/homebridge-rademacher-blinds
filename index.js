@@ -1,7 +1,7 @@
-var request = require("request");
-var Accessory, Service, Characteristic, UUIDGen;
+const axios = require('axios').default;
+let Accessory, Service, Characteristic, UUIDGen;
 
-module.exports = function(homebridge) {
+module.exports = (homebridge) => {
     Accessory = homebridge.platformAccessory;
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
@@ -14,7 +14,7 @@ function RademacherBlinds(log, config, api) {
     // global vars
     this.log = log;
 
-    var self = this;
+    let self = this;
 
     // configuration vars
     this.url = config["url"];
@@ -24,54 +24,58 @@ function RademacherBlinds(log, config, api) {
     if (api) {
         this.api = api;
 
-        this.api.on('didFinishLaunching', function() {
-            request.get({
-                timeout: 1500,
-                strictSSL: false,
-                url: this.url + "?devices=1"
-            }, function(e,r,b){
-                if(e) return new Error("Request failed.");
-                var body = JSON.parse(b);
-                body.devices.forEach(function(data) {
-                    if(data.productName.includes("RolloTron") || data.productName.includes("Troll Comfort"))
-                    {
-                        var uuid = UUIDGen.generate(data.serial);
-                        var accessory = self.accessories[uuid];
+        this.api.on('didFinishLaunching', function () {
+            axios.get(this.url, {
+                params: {
+                    devices: 1
+                }
+            })
+                .then((response) => {
+                    let body = JSON.parse(response.data);
+                    body.devices.forEach(function (data) {
+                        if (data.productName.includes("RolloTron") || data.productName.includes("Troll Comfort")) {
+                            let uuid = UUIDGen.generate(data.serial);
+                            let accessory = self.accessories[uuid];
 
-                        if (accessory === undefined) {
-                            self.addAccessory(data);
+                            if (accessory === undefined) {
+                                self.addAccessory(data);
+                            } else {
+                                self.log("Online: %s [%s]", accessory.displayName, data.serial);
+                                self.accessories[uuid] = new RademacherBlindsAccessory(self.log, (accessory instanceof RademacherBlindsAccessory ? accessory.accessory : accessory), data, self.url, self.inverted);
+                            }
                         }
-                        else {
-                            self.log("Online: %s [%s]", accessory.displayName, data.serial);
-                            self.accessories[uuid] = new RademacherBlindsAccessory(self.log, (accessory instanceof RademacherBlindsAccessory ? accessory.accessory : accessory), data, self.url, self.inverted);
-                        }
-                    }
+                    });
+                })
+                .catch((error) => {
+                    return new Error("Request failed: " + error);
                 });
-            });
         }.bind(this));
     }
 }
 
-RademacherBlinds.prototype.configureAccessory = function(accessory) {
+RademacherBlinds.prototype.configureAccessory = function (accessory) {
     this.accessories[accessory.UUID] = accessory;
 };
 
-RademacherBlinds.prototype.addAccessory = function(blind) {
+RademacherBlinds.prototype.addAccessory = function (blind) {
     this.log("Found: %s - %s [%s]", blind.name, blind.description, blind.serial);
 
-    var name = null;
-    if(!blind.description.trim())
+    let name = null;
+    if (!blind.description.trim()) {
         name = blind.name;
-    else
+    } else {
         name = blind.description;
-    var accessory = new Accessory(name, UUIDGen.generate(blind.serial));
+    }
+
+    let accessory = new Accessory(name, UUIDGen.generate(blind.serial));
     accessory.addService(Service.WindowCovering, name);
+
     this.accessories[accessory.UUID] = new RademacherBlindsAccessory(this.log, accessory, blind, this.url, this.inverted);
 
     this.api.registerPlatformAccessories("homebridge-rademacher-blinds", "RademacherBlinds", [accessory]);
 };
 
-RademacherBlinds.prototype.removeAccessory = function(accessory) {
+RademacherBlinds.prototype.removeAccessory = function (accessory) {
     if (accessory) {
         this.log("[" + accessory.description + "] Removed from HomeBridge.");
         if (this.accessories[accessory.UUID]) {
@@ -82,9 +86,9 @@ RademacherBlinds.prototype.removeAccessory = function(accessory) {
 };
 
 function RademacherBlindsAccessory(log, accessory, blind, url, inverted) {
-    var self = this;
+    let self = this;
 
-    var info = accessory.getService(Service.AccessoryInformation);
+    let info = accessory.getService(Service.AccessoryInformation);
 
     accessory.context.manufacturer = "Rademacher";
     info.setCharacteristic(Characteristic.Manufacturer, accessory.context.manufacturer.toString());
@@ -124,85 +128,94 @@ function RademacherBlindsAccessory(log, accessory, blind, url, inverted) {
     accessory.updateReachability(true);
 }
 
-RademacherBlindsAccessory.prototype.setTargetPosition = function(value, callback) {
+RademacherBlindsAccessory.prototype.setTargetPosition = function (value, callback) {
     this.log("%s - Setting target position: %s", this.accessory.displayName, value);
 
-    var self = this;
+    let self = this;
     this.currentTargetPosition = value;
-    var moveUp = (this.currentTargetPosition >= this.lastPosition);
+    let moveUp = (this.currentTargetPosition >= this.lastPosition);
     this.service.setCharacteristic(Characteristic.PositionState, (moveUp ? 1 : 0));
-    var target = self.inverted ? reversePercentage(value) : value;
+    let target = self.inverted ? reversePercentage(value) : value;
 
-    var params = "cid=9&did="+this.blind.did+"&command=1&goto="+ target;
-    request.post({
-        headers: {'content-type' : 'application/x-www-form-urlencoded'},
-        url: this.url,
-        body: params
-    }, function(e,r,b){
-        if(e) return callback(new Error("Request failed."), false);
-        if(r.statusCode == 200)
-        {
-            self.service.setCharacteristic(Characteristic.CurrentPosition, self.currentTargetPosition);
-            self.service.setCharacteristic(Characteristic.PositionState, 2);
-            self.lastPosition = self.currentTargetPosition;
-            callback(null, self.currentTargetPosition);
+    axios.post(this.url, {
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        params: {
+            cid: 9,
+            did: this.blind.did,
+            command: 1,
+            goto: target
         }
-    });
+    })
+        .then((request) => {
+            if (request.status === 200) {
+                self.service.setCharacteristic(Characteristic.CurrentPosition, self.currentTargetPosition);
+                self.service.setCharacteristic(Characteristic.PositionState, 2);
+                self.lastPosition = self.currentTargetPosition;
+                callback(null, self.currentTargetPosition);
+            }
+        })
+        .catch((error) => {
+            return callback(new Error("Request failed: " + error), false);
+        });
 };
 
-RademacherBlindsAccessory.prototype.getTargetPosition = function(callback) {
+RademacherBlindsAccessory.prototype.getTargetPosition = function (callback) {
     this.log("%s - Getting target position", this.accessory.displayName);
 
-    var self = this;
-    var serial = this.blind.serial;
+    let self = this;
+    let serial = this.blind.serial;
 
-    request.get({
-        timeout: 1500,
-        strictSSL: false,
-        url: this.url + "?devices=1"
-    }, function(e,r,b) {
-        if(e) return callback(new Error("Request failed."), false);
-        var body = JSON.parse(b);
-        body.devices.forEach(function(data) {
-            if(data.serial == serial)
-            {
-                var pos = self.inverted ? reversePercentage(data.position) : data.position;
-                self.currentTargetPosition = pos;
-                callback(null, pos);
-            }
+    axios.get(this.url, {
+        params: {
+            devices: 1
+        }
+    })
+        .then((request) => {
+            let body = JSON.parse(request.data);
+            body.devices.forEach(function (data) {
+                if (data.serial === serial) {
+                    let pos = self.inverted ? reversePercentage(data.position) : data.position;
+                    self.currentTargetPosition = pos;
+                    callback(null, pos);
+                }
+            });
+        })
+        .catch((error) => {
+            return callback(new Error("Request failed: " + error), false);
         });
-    });
 };
 
-RademacherBlindsAccessory.prototype.getCurrentPosition = function(callback) {
+RademacherBlindsAccessory.prototype.getCurrentPosition = function (callback) {
     this.log("%s - Getting current position", this.accessory.displayName);
 
-    var self = this;
-    var serial = this.blind.serial;
+    let self = this;
+    let serial = this.blind.serial;
 
-    request.get({
-        timeout: 1500,
-        strictSSL: false,
-        url: this.url + "?devices=1"
-    }, function(e,r,b) {
-        if(e) return callback(new Error("Request failed."), false);
-        var body = JSON.parse(b);
-        body.devices.forEach(function(data) {
-            if(data.serial == serial)
-            {
-                var pos = self.inverted ? reversePercentage(data.position) : data.position;
-                callback(null, pos);
-            }
+    axios.get(this.url, {
+        params: {
+            devices: 1
+        }
+    })
+        .then((request) => {
+            let body = JSON.parse(request.data);
+            body.devices.forEach(function (data) {
+                if (data.serial === serial) {
+                    let pos = self.inverted ? reversePercentage(data.position) : data.position;
+                    callback(null, pos);
+                }
+            });
+        })
+        .catch((error) => {
+            return callback(new Error("Request failed: " + error), false);
         });
-    });
 };
 
-RademacherBlindsAccessory.prototype.getPositionState = function(callback) {
+RademacherBlindsAccessory.prototype.getPositionState = function (callback) {
     callback(null, this.currentPositionState);
 };
 
 function reversePercentage(p) {
-    var min = 0;
-    var max = 100;
+    let min = 0;
+    let max = 100;
     return (min + max) - p;
 }
