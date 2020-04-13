@@ -18,7 +18,7 @@ Configuration sample:
       {
         "platform": "RademacherBlinds",
         "name": "RademacherBlinds",
-        "url": "http://192.168.0.1/deviceajax.do",
+        "url": "http://192.168.0.1",
         "inverted": true
       }
     ]
