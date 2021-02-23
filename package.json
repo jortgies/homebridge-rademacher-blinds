@@ -1,6 +1,6 @@
 {
   "name": "homebridge-rademacher-blinds",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "rademacher blinds plugin for homebridge: https://github.com/jortgies/homebridge-rademacher-blinds",
   "license": "MIT",
   "keywords": [
