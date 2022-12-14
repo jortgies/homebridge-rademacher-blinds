@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.9.0
+
+### add hue lights as dimmer
 ## 0.8.9
 
 ### add new blinds 23782076
