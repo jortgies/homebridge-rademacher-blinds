@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.9.1
+
+### fixed logging in environment sensor
 ## 0.9.0
 
 ### add hue lights as dimmer

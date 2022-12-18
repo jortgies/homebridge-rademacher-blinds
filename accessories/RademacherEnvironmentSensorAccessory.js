@@ -37,7 +37,7 @@ function RademacherEnvironmentSensorAccessory(log, debug, accessory, sensor, ses
 RademacherEnvironmentSensorAccessory.prototype = Object.create(RademacherAccessory.prototype);
 
 RademacherEnvironmentSensorAccessory.prototype.getCurrentTemperature = function (callback) {
-    this.log("%s [%s] - getCurrentTemperature()", this.accessory.displayName, this.sensor.did);
+    if (this.debug) this.log("%s [%s] - getCurrentTemperature()", this.accessory.displayName, this.sensor.did);
     callback(null, this.currentTemperature);
     var self = this;
     this.session.get("/v4/devices?devtype=Sensor", 30000, function(err, body) {
@@ -59,7 +59,7 @@ RademacherEnvironmentSensorAccessory.prototype.getCurrentTemperature = function 
 };
 
 RademacherEnvironmentSensorAccessory.prototype.getCurrentRainState = function (callback) {
-    this.log("%s [%s] - getCurrentRainState()", this.accessory.displayName, this.sensor.did);
+    if (this.debug) this.log("%s [%s] - getCurrentRainState()", this.accessory.displayName, this.sensor.did);
     callback(null, this.currentRainState);
     var self = this;
     this.session.get("/v4/devices?devtype=Sensor", 30000, function(err, body) {
@@ -83,7 +83,7 @@ RademacherEnvironmentSensorAccessory.prototype.getCurrentRainState = function (c
 
 
 RademacherEnvironmentSensorAccessory.prototype.getCurrentAmbientLightLevel = function (callback) {
-    this.log("%s [%s] - getCurrentAmbientLightLevel()", this.accessory.displayName, this.sensor.did);
+    if (this.debug) this.log("%s [%s] - getCurrentAmbientLightLevel()", this.accessory.displayName, this.sensor.did);
     callback(null,this.currentAmbientLightLevel);
     var self = this;
     this.session.get("/v4/devices?devtype=Sensor", 30000, function(err, body) {
