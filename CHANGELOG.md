@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.9.2
+
+### added Homepilot Rollotron Premium Smart to blinds
 ## 0.9.1
 
 ### fixed logging in environment sensor
