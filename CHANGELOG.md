@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.9.3
+
+### added more Smart products
 ## 0.9.2
 
 ### added Homepilot Rollotron Premium Smart to blinds

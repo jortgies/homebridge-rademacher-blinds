@@ -100,7 +100,7 @@ function RademacherHomePilot(log, config, api) {
                         var accessory = self.accessories[uuid];
                        
                         // blinds
-                        if(["27601565","35000864","14234511","35000662","36500172","36500572_A","16234511_A","16234511_S","45059071","31500162","23602075","32000064","32000064_A","14236011","23782076","10182345"].includes(data.deviceNumber))
+                        if(["27601565","35000864","14234511","35000662","36500172","36500572_A","16234511_A","16234511_S","45059071","31500162","23602075","32000064","32000064_A","14236011","23782076","10182345","10502002"].includes(data.deviceNumber))
                         {
                             if (accessory === undefined) {
                                 self.addBlindsAccessory(data);
@@ -122,7 +122,7 @@ function RademacherHomePilot(log, config, api) {
                             }
                         }
                         // thermostat
-                        else if(["35003064","32501812_A","35002319"].includes(data.deviceNumber))
+                        else if(["35003064","32501812_A","35002319","13601000"].includes(data.deviceNumber))
                         {
                             if (accessory === undefined) {
                                 self.addThermostatAccessory(data);
@@ -163,7 +163,7 @@ function RademacherHomePilot(log, config, api) {
                             self.addEnvironmentSensorAccessory(accessory, data);
                         }
                         // sun sensor
-                        else if(["32000069","32210069"].includes(data.deviceNumber))
+                        else if(["32000069","32210069","10771003"].includes(data.deviceNumber))
                         {
                             self.addSunSensorAccessory(accessory, data);
                         }
