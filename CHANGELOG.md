@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.9.4
+
+### fixed recently added Smart products
 ## 0.9.3
 
 ### added more Smart products
