@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.9.5
+### added HomePilot RolloTron pure smart (10122345)
+
 ## 0.9.4
 
 ### fixed recently added Smart products
