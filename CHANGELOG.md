@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.9.6
+### added Hutschienen Aktor and Dimmer
+
 ## 0.9.5
 ### added HomePilot RolloTron pure smart (10122345)
 
