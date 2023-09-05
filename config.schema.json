@@ -1,0 +1,69 @@
+{
+    "pluginAlias": "RademacherHomePilot",
+    "pluginType": "platform",
+    "singular": true,
+    "headerDisplay": "Plugin for Rademacher Homepilot / HOMEPILOT Gateway",
+    "footerDisplay": "For a detailed description, see the [github project](https://github.com/bombadiltom/homebridge-rademacher-homepilot)",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "url": {
+                "title": "URL",
+                "type": "string",
+                "required": true,
+                "description": "address of HomePilot's web interface in your local network, example: http://192.168.2.1",
+                "format": "uri"
+            },
+            "password": {
+                "title": "Password",
+                "type": "string",
+                "required": false,
+                "description": "password to HomePilot (if enabled in its web interface)"
+            },
+            "password_hashed": {
+                "title": "Password hashed",
+                "type": "boolean",
+                "required": false,
+                "default": false,
+                "description": "password to HomePilot is already hashed with sha256 (if enabled in its web interface), for hashing https://www.sha-generator.de/ worked for me"
+            },
+            "scenes_as_switch": {
+                "title": "Scenes as switch",
+                "type": "boolean",
+                "required": true,
+                "default": true,
+                "description": " if true, all scenes are added as switch to HomeKit, otherwise scenes are not added at all "
+            },
+            "debug": {
+                "title": "Log DEBUG messages",
+                "type": "boolean",
+                "required": true,
+                "default": false,
+                "description": "if true, debugging is activated"
+            },
+            "did_list_usage": {
+                "title": "DID list usage",
+                "type": "string",
+                "enum": [
+                    "none",
+                    "include",
+                    "exclude"
+                ],
+                "required": true,
+                "default": "none",
+                "description": "if include you can choose what Devices are mirrored to HomeKit, you have to enter matching DIDs below, if exclude you can exclude a list of DIDs, default is none"
+            },
+            "did_list": {
+                "title": "DID list",
+                "type": "array",
+                "items": {
+                    "title": "DID",
+                    "type": "integer",
+                    "description": "DID to include/exclude"
+                },
+                "required": false,
+                "description": "enter the Device IDs (DIDs) you want to be shown in HomeKit. You can find them in the log file in square brackets ([12/6/2020, 5:40:36 PM] [RademacherHomePilot] blinds are online: bodentief [10000] => did = 10000), example list: did_list: [10000,10001,10002]"
+            }
+        }
+    }
+}

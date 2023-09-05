@@ -25,7 +25,7 @@ module.exports = function(homebridge) {
 // exclude/include dids
 function did_filter(log, config,data)
 {
-    this.debug = (config["debug"] == "true"); 
+    this.debug = (String(config["debug"]).toLowerCase() == "true"); 
     id=data.did?data.did:data.sid;
     if (this.debug && config["did_list_usage"] && config["did_list"]) 
     {
@@ -71,7 +71,7 @@ function did_filter(log, config,data)
 function RademacherHomePilot(log, config, api) {
     // global vars
     this.log = log;
-    this.debug = (config["debug"] == "true"); 
+    this.debug = (String(config["debug"]).toLowerCase() == "true"); 
     if (this.debug) log("Debugging...")
     var self = this;
 
@@ -282,7 +282,7 @@ function RademacherHomePilot(log, config, api) {
                 }
                 self.session.get("/v4/devices?devtype=Actuator", 30000, handleActuators);
                 self.session.get("/v4/devices?devtype=Sensor", 30000, handleSensors);
-                if (config["scenes_as_switch"] && config["scenes_as_switch"]=="true")
+                if (String(config["scenes_as_switch"]).toLowerCase() == "true")
                 {
                     self.session.get("/v4/scenes", 30000, handleScenes);
                 }

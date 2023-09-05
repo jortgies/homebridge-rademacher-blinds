@@ -13,9 +13,9 @@
     "name": "RademacherHomePilot",
     "url": "http://192.168.2.1",
     "password": "",
-    "password_hashed": "false",
-    "scenes_as_switch": "false",
-    "debug": "false",
+    "password_hashed": false,
+    "scenes_as_switch": false,
+    "debug": false,
     "did_list_usage": "none",
     "did_list": []
     } 

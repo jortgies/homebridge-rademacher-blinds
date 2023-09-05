@@ -1,5 +1,7 @@
 # Changelog
 
+## 0.10.0
+### UI config schema
 ## 0.9.6
 ### added Hutschienen Aktor and Dimmer
 

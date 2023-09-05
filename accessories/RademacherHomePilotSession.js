@@ -10,7 +10,7 @@ function RademacherHomePilotSession(log, debug, url, password, password_hashed) 
     this.log = log;
     this.debug = debug;
     this.url = url;
-    this.password_hashed ? (password_hashed == "true") : false;
+    this.password_hashed ? (String(password_hashed).toLowerCase() == "true") : false;
     this.password = password ? (password_hashed?password:sha256hex(password)) : null;
 }
 
