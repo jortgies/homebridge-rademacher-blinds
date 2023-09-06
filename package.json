@@ -1,6 +1,6 @@
 {
   "name": "homebridge-rademacher-homepilot",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "rademacher homepilot plugin for homebridge: https://github.com/bombadiltom/homebridge-rademacher-homepilot",
   "license": "MIT",
   "keywords": [
@@ -14,17 +14,17 @@
     "url": "http://github.com/bombadiltom/homebridge-rademacher-homepilot/issues"
   },
   "engines": {
-    "node": ">=0.12.0",
-    "homebridge": ">=0.4.45"
+    "node": ">=16.0.0",
+    "homebridge": ">=1.0.0"
   },
   "dependencies": {
-    "axios": "^0.21.1",
-    "axios-cookiejar-support": "^1.0.1",
-    "request": "^2.88.0",
-    "tough-cookie": "^2.4.3"
+    "axios": "^0",
+    "axios-cookiejar-support": "^1",
+    "request": "^2",
+    "tough-cookie": "^2"
   },
   "devDependencies": {
-    "homebridge": "^1.1.0"
+    "homebridge": "^1"
   },
   "funding": {
     "type" : "paypal",
