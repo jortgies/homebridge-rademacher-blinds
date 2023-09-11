@@ -5,8 +5,7 @@
     "port": 51826,
     "pin": "031-45-154"
   },
-
-  "description": "Change IP and if active insert password. If you just want all of your Rademacher devices in HomeKit just leave "DIDs" and "UseDIDs" as is.",
+  "description": "Change IP and if active insert password. If you just want all of your Rademacher/HOMEPILOT devices in HomeKit just leave did_list and did_list_usage as is.",
   "platforms": [
     {
     "platform": "RademacherHomePilot",

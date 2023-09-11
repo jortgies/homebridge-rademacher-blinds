@@ -1,6 +1,11 @@
 # Changelog
+
+## 0.10.3
+### exclude shell scripts, fix config, add name property
+
 ## 0.10.2
 ### added blinds 10236020
+
 ## 0.10.1
 ### update dependencies
 
