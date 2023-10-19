@@ -1,5 +1,7 @@
 # Changelog
 
+## 0.10.5
+### fixed themostat accessory
 ## 0.10.4
 ### add verification
 ## 0.10.3
