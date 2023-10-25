@@ -1,5 +1,7 @@
 # Changelog
 
+## 0.10.6
+### add mising device number of blinds actuator 
 ## 0.10.5
 ### fixed themostat accessory
 ## 0.10.4
