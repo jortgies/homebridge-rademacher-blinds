@@ -1,11 +1,16 @@
 # Changelog
+## 0.10.7
+### add 10251530
 
 ## 0.10.6
 ### add mising device number of blinds actuator 
+
 ## 0.10.5
 ### fixed themostat accessory
+
 ## 0.10.4
 ### add verification
+
 ## 0.10.3
 ### exclude shell scripts, fix config, add name property
 
