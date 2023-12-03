@@ -1,4 +1,8 @@
 # Changelog
+
+## 0.10.8
+### add door sensor 14771002
+
 ## 0.10.7
 ### add 10251530
 
