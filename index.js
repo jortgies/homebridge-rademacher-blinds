@@ -225,7 +225,7 @@ function RademacherHomePilot(log, config, api) {
                             }
                         }
                         // door/window sensor
-                        else if(["32003164","32002119"].includes(data.deviceNumber))
+                        else if(["32003164","32002119","14771002"].includes(data.deviceNumber))
                         {
                             if (accessory === undefined) {
                                 self.addDoorSensorAccessory(data);
