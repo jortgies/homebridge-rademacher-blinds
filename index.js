@@ -134,7 +134,7 @@ function RademacherHomePilot(log, config, api) {
                             }
                         }
                         // lock/switch
-                        else if(["35000262","35001164","32501972","32501972_A"].includes(data.deviceNumber))
+                        else if(["35000262","35001164","32501972","32501972_A","99999960"].includes(data.deviceNumber))
                         {
                             // icon = "Schließkontakt" ? => lock
                             if (data.iconSet.k.includes("iconset27")){

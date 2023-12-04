@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.10.9
+### add switches from Hue (99999960)
+
 ## 0.10.8
 ### add door sensor 14771002
 
