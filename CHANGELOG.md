@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.10.10
+### add homepilot switch (11301001)
+
 ## 0.10.9
 ### add switches from Hue (99999960)
 
