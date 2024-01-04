@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.10.11
+### add HomePilot Rolladen classic smart (10142345)
+
 ## 0.10.10
 ### add homepilot switch (11301001)
 
