@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.10.12
+### add Homepilot garage door opener (16901001)
+
 ## 0.10.11
 ### add HomePilot Rolladen classic smart (10142345)
 
